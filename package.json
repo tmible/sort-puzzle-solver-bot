@@ -1,0 +1,28 @@
+{
+  "name": "sort-puzzle-solver-bot",
+  "version": "1.0.0",
+  "description": "Телеграм-бот, решающий игру с сортировкой цветных объектов по колбам",
+  "scripts": {
+    "start": "node ./src/index.js",
+    "start:bg": "forever start ./src/index.js",
+    "restart:bg": "forever restart ./src/index.js",
+    "stop:bg": "forever stop ./src/index.js",
+    "test": "node --test --experimental-test-coverage",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tmible/sort-puzzle-solver-bot.git"
+  },
+  "type": "module",
+  "dependencies": {
+    "canvas": "^2.11.2",
+    "dotenv": "^16.3.1",
+    "get-pixels": "^3.3.3",
+    "js-priority-queue": "^0.1.5",
+    "telegraf": "^4.13.1"
+  },
+  "devDependencies": {
+    "husky": "^8.0.3"
+  }
+}

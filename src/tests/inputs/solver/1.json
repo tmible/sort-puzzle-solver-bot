@@ -1,0 +1,21 @@
+{
+  "name": "tiny",
+  "solvingMethod": "balanced",
+  "args": [
+    [
+      [
+        0,
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        1,
+        0
+      ]
+    ],
+    "balanced"
+  ]
+}
