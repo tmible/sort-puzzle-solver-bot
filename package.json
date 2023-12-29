@@ -4,9 +4,9 @@
   "description": "Телеграм-бот, решающий игру с сортировкой цветных объектов по колбам",
   "scripts": {
     "start": "node ./src/index.js",
-    "start:bg": "forever start ./src/index.js",
-    "restart:bg": "forever restart ./src/index.js",
-    "stop:bg": "forever stop ./src/index.js",
+    "start:bg": "forever start --uid \"sort-puzzle-solver-bot\" ./src/index.js",
+    "restart:bg": "forever restart --uid \"sort-puzzle-solver-bot\"",
+    "stop:bg": "forever stop --uid \"sort-puzzle-solver-bot\"",
     "test": "node --test --experimental-test-coverage",
     "prepare": "husky install"
   },

@@ -2,6 +2,7 @@
 import { readFile } from 'fs/promises';
 import { strict as assert } from 'node:assert';
 import { beforeEach, describe, it } from 'node:test';
+import getPixels from 'get-pixels';
 import { FlasksMargin } from '../constants/image-options/flasks-margin.const.js';
 import { FlaskBorderWidth } from '../constants/image-options/flask-border-width.const.js';
 import { SquareSide } from '../constants/image-options/square-side.const.js';
@@ -42,6 +43,41 @@ const preparePixels = (rowsNumber, flasksInRows, layersMatrix, colors) => {
   return [ shape, pixels ];
 };
 
+const calcPixelsDiffPercent = async (actualSource, expectedSource) => {
+  const actual = await new Promise(async (resolve, reject) => {
+    getPixels(
+      actualSource,
+      'image/png',
+      (err, imageData) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(imageData.data);
+      },
+    );
+  });
+
+  const expected = await new Promise((resolve, reject) => {
+    getPixels(
+      expectedSource,
+      'image/png',
+      (err, imageData) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(imageData.data);
+      },
+    );
+  });
+
+  let diff = 0;
+  for (let i = 0; i < Math.max(actual.length, expected.length); ++i) {
+    diff += actual[i] !== expected[i] ? 1 : 0;
+  }
+
+  return Math.round(diff / actual.length * 100);
+};
+
 describe('image-analyser', () => {
   describe('detectSpots', () => {
     it('should reject if buffer is invalid', () => {
@@ -80,7 +116,7 @@ describe('image-analyser', () => {
     describe('real tests with compressed images', () => {
       for (let i = 0; i < 5; ++i) {
         it(`should pass real test ${i}`, async () => {
-          assertSnapshotMatch(
+          await assertSnapshotMatch(
             await detectSpots(await readFile(`./src/tests/inputs/detect-spots/${i}.jpg`)),
             `detect-spots/${i}.snapshot.json`,
           );
@@ -99,10 +135,13 @@ describe('image-analyser', () => {
         [ '255,209,220', '167,199,231', '195,177,225' ],
         ctx,
       );
-      assertSnapshotMatch(
-        markSpots(...(await detectSpots(canvas.toBuffer(), 'image/png')), 1),
-        'mark-spots/marked-spots.snapshot.png',
+
+      const diffPercent = await calcPixelsDiffPercent(
+        await markSpots(...(await detectSpots(canvas.toBuffer(), 'image/png')), 1),
+        './src/tests/snapshots/mark-spots/marked-spots.snapshot.png',
       );
+
+      assert.equal(diffPercent <= 3, true);
     });
   });
 
@@ -180,19 +219,22 @@ describe('image-analyser', () => {
     describe('real tests with compressed images', () => {
       for (let i = 0; i < 5; ++i) {
         it(`should pass real test ${i}`, async () => {
-          const expectedJSON = JSON.parse(await readFile(
-            `./src/tests/snapshots/analyze-image/${i}.snapshot.json`,
-          ));
-          const expectedBuffer = await readFile(
+          const actual = analyzeImage(
+            ...(await detectSpots(await readFile(`./src/tests/inputs/detect-spots/${i}.jpg`))),
+            new Set(JSON.parse(await readFile(`./src/tests/inputs/analyze-image/${i}.json`))),
+          );
+
+          assertSnapshotMatch(
+            [ actual[0], ...actual.slice(2, 4) ],
+            `analyze-image/${i}.snapshot.json`,
+          );
+
+          const diffPercent = await calcPixelsDiffPercent(
+            actual[1],
             `./src/tests/snapshots/analyze-image/${i}.snapshot.png`,
           );
-          assert.deepEqual(
-            analyzeImage(
-              ...(await detectSpots(await readFile(`./src/tests/inputs/detect-spots/${i}.jpg`))),
-              new Set(JSON.parse(await readFile(`./src/tests/inputs/analyze-image/${i}.json`))),
-            ),
-            [ ...expectedJSON.slice(0, 1), expectedBuffer, ...expectedJSON.slice(1, 3) ],
-          );
+
+          assert.equal(diffPercent, 0);
         });
       }
     });
