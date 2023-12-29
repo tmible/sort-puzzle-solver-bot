@@ -5,8 +5,8 @@
   "scripts": {
     "start": "node ./src/index.js",
     "start:bg": "forever start --uid \"sort-puzzle-solver-bot\" ./src/index.js",
-    "restart:bg": "forever restart --uid \"sort-puzzle-solver-bot\"",
-    "stop:bg": "forever stop --uid \"sort-puzzle-solver-bot\"",
+    "restart:bg": "forever restart sort-puzzle-solver-bot",
+    "stop:bg": "forever stop sort-puzzle-solver-bot",
     "test": "node --test --experimental-test-coverage",
     "prepare": "husky install"
   },
