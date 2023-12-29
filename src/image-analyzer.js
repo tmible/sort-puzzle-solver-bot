@@ -494,6 +494,7 @@ export const markSpots = (shape, pixels, spots, mask, runNumber) => {
   const visited = new Array(shape[1]).fill(null).map(() => new Array(shape[0]).fill(false));
 
   // сначала копирование на холст пикселей пятен, которые нужно отметить
+  ctx.textAlign = 'center';
   for (let i = 0; i < SpotsInRunNumber * (runNumber + 1) && i < spots.length; ++i) {
     const spot = spots[i];
     ctx.fillStyle = `rgb(${pixels[spot.start[0]][spot.start[1]].join(',')})`;
@@ -511,16 +512,15 @@ export const markSpots = (shape, pixels, spots, mask, runNumber) => {
     const opacity = i < SpotsInRunNumber * runNumber ?
       PreviousSpotNumberOpacity :
       CurrentSpotNumberOpacity;
-    ctx.fillStyle = `rgba(${SpotNumberTextColor},${opacity}`;
-    ctx.strokeStyle = `rgba(${SpotNumberStrokeColor},${opacity}`;
+    ctx.fillStyle = `rgba(${SpotNumberTextColor},${opacity})`;
+    ctx.strokeStyle = `rgba(${SpotNumberStrokeColor},${opacity})`;
     ctx.font = `${Math.round((spot.bottom - spot.top) / 3)}px sans-serif`;
 
     const verticalMiddle = Math.round((spot.bottom + spot.top) / 2);
     const horizontalMiddle = Math.round((spot.right + spot.left) / 2);
-    const measurements = ctx.measureText(i + 1);
 
-    ctx.fillText(i + 1, horizontalMiddle - measurements.width / 2, verticalMiddle);
-    ctx.strokeText(i + 1, horizontalMiddle - measurements.width / 2, verticalMiddle);
+    ctx.fillText(i + 1, horizontalMiddle, verticalMiddle);
+    ctx.strokeText(i + 1, horizontalMiddle, verticalMiddle);
   }
 
   // после этого копирование на холст пикселей всех остальных пятен

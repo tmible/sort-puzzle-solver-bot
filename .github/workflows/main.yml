@@ -1,0 +1,51 @@
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: install node
+      uses: actions/setup-node@v4
+    - name: install pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8
+    - name: install dependencies
+      run: |
+        pnpm pkg delete scripts.prepare
+        pnpm install --prod
+    - name: tests
+      run: pnpm test
+
+  deploy:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: deploy
+      uses: easingthemes/ssh-deploy@main
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        TARGET: ${{ secrets.REMOTE_TARGET }}
+        EXCLUDE: "/.git/, /.github/, /.husky/, /assets/, README.md, .gitignore, /src/tests/, /src/bot/tests"
+        SCRIPT_AFTER: |
+          cd ${{ secrets.REMOTE_TARGET }}
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+          # pnpm
+          export PNPM_HOME="/root/.local/share/pnpm"
+          case ":$PATH:" in
+            *":$PNPM_HOME:"*) ;;
+            *) export PATH="$PNPM_HOME:$PATH" ;;
+          esac
+          # pnpm end
+          pnpm pkg delete scripts.prepare
+          pnpm install --prod
+          pnpm run restart:bg || pnpm start:bg
