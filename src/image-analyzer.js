@@ -495,6 +495,7 @@ export const markSpots = (shape, pixels, spots, mask, runNumber) => {
 
   // сначала копирование на холст пикселей пятен, которые нужно отметить
   ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
   for (let i = 0; i < SpotsInRunNumber * (runNumber + 1) && i < spots.length; ++i) {
     const spot = spots[i];
     ctx.fillStyle = `rgb(${pixels[spot.start[0]][spot.start[1]].join(',')})`;

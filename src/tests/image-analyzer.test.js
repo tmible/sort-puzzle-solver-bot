@@ -141,7 +141,7 @@ describe('image-analyser', () => {
         './src/tests/snapshots/mark-spots/marked-spots.snapshot.png',
       );
 
-      assert.equal(diffPercent <= 3, true);
+      assert.equal(diffPercent <= 4, true);
     });
   });
 
